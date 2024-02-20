@@ -12,24 +12,22 @@ class SensorListView(ListAPIView):
     queryset = Sensor.objects.all()
     serializer_class = SensorSerializer
 
+class SensorView(APIView):
 
-class SensorView(RetrieveAPIView):
-    queryset = Sensor.objects.all()
-    serializer_class = SensorDetailSerializer
+    def get(self, request, pk):
+        if not pk.isdigit():
+            return Response({'err': 'Не верный id датчика'})
 
-    # def post(self, request):
-    #     return Response({'status': 'OK'})
-#
-#
-#
-# class MeasurementView(ListAPIView):
-#     queryset = Sensor.objects.all()
-#     serializer_class = SensorDetailSerializer
-#
-#     # def post(self, request):
-#     #     return Response({'status': 'OK'})
-#
-#
-# class MeasurementSerializerView(RetrieveAPIView):
-#     queryset = Measurement.objects.all()
-#     serializer_class = MeasurementSerializer
+        sensors = Sensor.objects.filter(id=int(pk))
+        serializer = SensorDetailSerializer(sensors, many=True)
+        return Response({"articles": serializer.data})
+
+    def post(self, request):
+
+        print(request)
+        name = request.data.get("name")
+        description = request.data.get("description")
+        if name is None:
+            return Response({'err': 'Не верное название датчика'})
+
+        return Response({"success": f"Sensor '{name}' создан успешно"})
