@@ -30,4 +30,11 @@ class SensorView(APIView):
         if name is None:
             return Response({'err': 'Не верное название датчика'})
 
-        return Response({"success": f"Sensor '{name}' создан успешно"})
+        serializer = SensorSerializer(data={
+            'name': name,
+            'description': description,
+        })
+        if serializer.is_valid(raise_exception=True):
+            sensor_saved = serializer.save()
+            return Response({"success": f"Sensor '{sensor_saved.name}' создан успешно"})
+        return Response({'err': 'Ошибка создания датчика'})
