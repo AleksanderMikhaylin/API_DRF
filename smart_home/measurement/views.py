@@ -49,23 +49,3 @@ class SensorView(APIView):
             sensor_saved = serializer.save()
             return Response({"success": f"Показания температуры {sensor_saved.temperature}C для датчика '{sensor.name}' добавлены успешно"})
         return Response({'err': f'Ошибка добавления показания для датчика {sensor.name}'})
-
-class SensorAdd(APIView):
-
-    def get(self, request):
-        return Response({"err": "Method 'GET' not allowed."})
-
-    def post(self, request):
-
-        # print(request)
-        name = request.data.get("name")
-        description = request.data.get("description")
-        if name is None:
-            return Response({'err': 'Не верное название датчика'})
-
-        serializer = SensorSerializer(data=dict(name=name, description=description))
-        if serializer.is_valid(raise_exception=True):
-            sensor_saved = serializer.save()
-            return Response({"success": f"Sensor '{sensor_saved.name}' создан успешно, id={sensor_saved.id}"})
-        return Response({'err': 'Ошибка создания датчика'})
-
