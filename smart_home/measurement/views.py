@@ -4,8 +4,10 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from measurement.serializers import SensorSerializer, SensorDetailSerializer, MeasurementSerializer
+from measurement.serializers import SensorSerializer, SensorDetailSerializer, MeasurementSerializer, CreateMeasurementSerializer
 from measurement.models import Sensor, Measurement
+from datetime import datetime
+
 
 class SensorListView(ListAPIView):
     queryset = Sensor.objects.all()
@@ -20,27 +22,37 @@ class SensorView(APIView):
 
         sensors = Sensor.objects.filter(id=int(pk))
         serializer = SensorDetailSerializer(sensors, many=True)
-        return Response({"articles": serializer.data})
+        return Response({"sensor": serializer.data})
 
     def post(self, request, pk):
         if not pk.isdigit():
             return Response({'err': 'Не верный id датчика'})
 
-        sensors = Sensor.objects.filter(id=int(pk))
-        if sensors is None:
+        sensor = Sensor.objects.filter(id=int(pk)).first()
+        if sensor is None:
             return Response({f'err': f'Датчик с id={pk} не существует!'})
 
         temperature = request.data.get("temperature")
         if temperature is None:
             return Response({'err': 'Не найден параметр температуры'})
-        if not temperature.isdigit():
+        try:
+            temperature_float = float(temperature)
+        except:
             return Response({'err': 'Не верный параметр температуры'})
 
-        serializer = MeasurementSerializer(data=dict(sensor_id=pk, temperature=temperature, created_at=datetime.now()))
+        data = {
+            'sensor_id': int(pk),
+            'temperature': '{:.1f}'.format(temperature_float),
+            'created_at': datetime.now(),
+        }
+
+        # serializer = MeasurementSerializer(data=data)
+        serializer = CreateMeasurementSerializer(data=data)
+
         if serializer.is_valid(raise_exception=True):
             sensor_saved = serializer.save()
-            return Response({"success": f"Показания температуры {sensor_saved.temperature}C для датчика '{sensors.name}' добавлены успешно"})
-        return Response({'err': f'Ошибка добавления показания для датчика {sensors.name}'})
+            return Response({"success": f"Показания температуры {sensor_saved.temperature}C для датчика '{sensor.name}' добавлены успешно"})
+        return Response({'err': f'Ошибка добавления показания для датчика {sensor.name}'})
 
 class SensorAdd(APIView):
 
