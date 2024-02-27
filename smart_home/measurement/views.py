@@ -17,16 +17,12 @@ class SensorListView(ListAPIView):
 class SensorView(APIView):
 
     def get(self, request, pk):
-        if not pk.isdigit():
-            return Response({'err': 'Не верный id датчика'})
 
         sensors = Sensor.objects.filter(id=int(pk))
         serializer = SensorDetailSerializer(sensors, many=True)
         return Response({"sensor": serializer.data})
 
     def post(self, request, pk):
-        if not pk.isdigit():
-            return Response({'err': 'Не верный id датчика'})
 
         sensor = Sensor.objects.filter(id=int(pk)).first()
         if sensor is None:
