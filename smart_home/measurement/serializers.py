@@ -21,11 +21,6 @@ class CreateMeasurementSerializer(serializers.ModelSerializer):
             temperature=self.initial_data.get('temperature'),
             created_at=self.initial_data.get('created_at'),
         )
-        # measurement = Measurement.objects.create(
-        #     sensor_id=self.initial_data.get('sensor_id'),
-        #     temperature=validated_data.get('temperature'),
-        #     created_at=validated_data.get('created_at'),
-        # )
         return measurement
 
 
@@ -34,6 +29,9 @@ class SensorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sensor
         fields = ['id', 'name', 'description']
+
+    def create(self, validated_data):
+        return super().create(validated_data)
 
 
 class SensorDetailSerializer(serializers.ModelSerializer):
